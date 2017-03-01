@@ -1,0 +1,13 @@
+all: example_vector_add 
+
+cpu: vector_add_sol.F90
+	pgf90 -c -O3 vector_add_sol.F90 -o cpu.o
+
+gpu: vector_add_sol.F90 cpu_gpu_iface.F90
+	pgf90 -Mcuda -DUSE_GPU -c -O3 cpu_gpu_iface.F90 -o iface.o && pgf90 -Mcuda -DUSE_GPU -c -O3 vector_add_sol.F90 -o gpu.o
+
+example_vector_add: gpu cpu
+	pgf90 -Mcuda -O3 main.F90 iface.o gpu.o cpu.o
+
+clean:
+	rm *.o *.mod example_vector_add 
